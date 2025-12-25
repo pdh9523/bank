@@ -1,0 +1,20 @@
+services:
+  server:
+    build: .
+    image: bank-server
+    container_name: bank-server
+    env_file:
+      - .env.server
+    ports:
+      - "8080:8080"
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    env_file:
+      - .env.db
+
+volumes:
+  postgres-data:
