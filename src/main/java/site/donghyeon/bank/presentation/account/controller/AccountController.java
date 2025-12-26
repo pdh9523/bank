@@ -1,0 +1,52 @@
+package site.donghyeon.bank.presentation.account.controller;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import site.donghyeon.bank.application.account.AccountUseCase;
+import site.donghyeon.bank.presentation.account.request.CloseAccountRequest;
+import site.donghyeon.bank.presentation.account.request.OpenAccountRequest;
+import site.donghyeon.bank.presentation.account.response.OpenAccountResponse;
+
+
+@RestController
+@RequestMapping("/account")
+@Tag(name = "계좌", description = "계좌 관련 API 입니다.")
+public class AccountController {
+
+    private final AccountUseCase accountUseCase;
+
+    public AccountController(AccountUseCase accountUseCase) {
+        this.accountUseCase = accountUseCase;
+    }
+
+    @PostMapping()
+    @Operation(
+            summary = "계좌 개설",
+            description = "<p>계좌를 개설합니다.</p>" +
+                    "<p>TODO: keycloak 도입 시 인증을 통해 파라미터를 받도록 수정합니다.</p>"
+    )
+    public ResponseEntity<OpenAccountResponse> openAccount(
+            @RequestBody OpenAccountRequest request
+    ) {
+        return ResponseEntity.ok(
+                OpenAccountResponse.from(
+                        accountUseCase.openAccount(request.toCommand())
+                )
+        );
+    }
+
+    @DeleteMapping()
+    @Operation(
+            summary = "계좌 해지",
+            description = "<p>계좌를 해지합니다.</p>" +
+                    "<p>TODO: keycloak 도입 시 인증을 통해 파라미터를 받도록 수정합니다.</p>"
+    )
+    public ResponseEntity<Void> closeAccount(
+            @RequestBody CloseAccountRequest request
+    ) {
+        accountUseCase.closeAccount(request.toCommand());
+        return ResponseEntity.noContent().build();
+    }
+}
