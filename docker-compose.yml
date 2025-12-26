@@ -7,6 +7,9 @@ services:
       - .env.server
     ports:
       - "8080:8080"
+    depends_on:
+      - rabbitmq
+      - postgres
 
   postgres:
     image: postgres:16
@@ -15,6 +18,12 @@ services:
       - postgres-data:/var/lib/postgresql/data
     env_file:
       - .env.db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
 
 volumes:
   postgres-data:
