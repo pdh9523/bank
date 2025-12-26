@@ -7,6 +7,7 @@ import site.donghyeon.bank.application.account.command.DepositCommand;
 import site.donghyeon.bank.application.account.command.OpenAccountCommand;
 import site.donghyeon.bank.application.account.result.DepositResult;
 import site.donghyeon.bank.application.account.result.OpenAccountResult;
+import site.donghyeon.bank.application.account.task.DepositTask;
 import site.donghyeon.bank.common.domain.Money;
 import site.donghyeon.bank.domain.account.Account;
 import site.donghyeon.bank.application.account.repository.AccountRepository;
@@ -18,9 +19,14 @@ import java.util.UUID;
 public class AccountService implements AccountUseCase {
 
     private final AccountRepository accountRepository;
+    private final DepositCommandPublisher depositCommandPublisher;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(
+            AccountRepository accountRepository,
+            DepositCommandPublisher depositCommandPublisher
+    ) {
         this.accountRepository = accountRepository;
+        this.depositCommandPublisher = depositCommandPublisher;
     }
 
     @Override
@@ -45,12 +51,12 @@ public class AccountService implements AccountUseCase {
     @Override
     @Transactional
     public DepositResult deposit(DepositCommand command) {
-        Account account = accountRepository.findById(command.accountId());
-
-        account.deposit(new Money(command.amount()));
-
-        return DepositResult.from(
-                accountRepository.save(account)
+        DepositTask task = new DepositTask(
+                UUID.randomUUID(),
+                command.toAccountId(),
+                new Money(command.amount())
         );
+        depositCommandPublisher.publish(task);
+        return DepositResult.from(task);
     }
 }

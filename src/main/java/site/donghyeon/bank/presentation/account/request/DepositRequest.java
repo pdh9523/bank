@@ -13,12 +13,12 @@ public record DepositRequest(
         @NotBlank(message = "입금할 금액은 필수입니다.")
         long amount
 ) {
-    public DepositCommand toCommand(UUID accountId) {
-        if (accountId == null) {
+    public DepositCommand toCommand(UUID toAccountId) {
+        if (toAccountId == null) {
             throw new BadRequestException("accountID is required");
         }
         return new DepositCommand(
-                accountId,
+                toAccountId,
                 this.amount
         );
     }

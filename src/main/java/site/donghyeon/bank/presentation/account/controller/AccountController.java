@@ -58,13 +58,14 @@ public class AccountController {
     @Operation(
             summary = "계좌 입금",
             description = "<p>계좌에 금액을 입금합니다.</p>" +
+                    "<p> 입금에 성공한 경우, 거래 내역의 PK를 반환한다. </p>" +
                     "<p>TODO: 무통장 입금 등을 고려했을 때 잔고 표시 여부에 대한 논의</p>"
     )
     public ResponseEntity<DepositResponse> deposit(
             @PathVariable UUID accountId,
             @RequestBody DepositRequest request
     ) {
-        return ResponseEntity.ok(
+        return ResponseEntity.accepted().body(
                 DepositResponse.from(
                     accountUseCase.deposit(request.toCommand(accountId))
                 )

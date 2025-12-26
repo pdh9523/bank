@@ -1,17 +1,15 @@
 package site.donghyeon.bank.application.account.result;
 
-import site.donghyeon.bank.domain.account.Account;
+import site.donghyeon.bank.application.account.task.DepositTask;
 
 import java.util.UUID;
 
 public record DepositResult(
-        UUID accountId,
-        long balance
+        UUID txId
 ) {
-    public static DepositResult from(Account account) {
+    public static DepositResult from(DepositTask task) {
         return new DepositResult(
-                account.getAccountId(),
-                account.getBalance().amount()
+                task.txId()
         );
     }
 }
