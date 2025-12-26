@@ -6,8 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.donghyeon.bank.application.account.AccountUseCase;
 import site.donghyeon.bank.presentation.account.request.CloseAccountRequest;
+import site.donghyeon.bank.presentation.account.request.DepositRequest;
 import site.donghyeon.bank.presentation.account.request.OpenAccountRequest;
+import site.donghyeon.bank.presentation.account.response.DepositResponse;
 import site.donghyeon.bank.presentation.account.response.OpenAccountResponse;
+
+import java.util.UUID;
 
 
 @RestController
@@ -48,5 +52,22 @@ public class AccountController {
     ) {
         accountUseCase.closeAccount(request.toCommand());
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{accountId}/deposit")
+    @Operation(
+            summary = "계좌 입금",
+            description = "<p>계좌에 금액을 입금합니다.</p>" +
+                    "<p>TODO: 무통장 입금 등을 고려했을 때 잔고 표시 여부에 대한 논의</p>"
+    )
+    public ResponseEntity<DepositResponse> deposit(
+            @PathVariable UUID accountId,
+            @RequestBody DepositRequest request
+    ) {
+        return ResponseEntity.ok(
+                DepositResponse.from(
+                    accountUseCase.deposit(request.toCommand(accountId))
+                )
+        );
     }
 }

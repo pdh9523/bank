@@ -3,8 +3,11 @@ package site.donghyeon.bank.application.account;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.donghyeon.bank.application.account.command.CloseAccountCommand;
+import site.donghyeon.bank.application.account.command.DepositCommand;
 import site.donghyeon.bank.application.account.command.OpenAccountCommand;
+import site.donghyeon.bank.application.account.result.DepositResult;
 import site.donghyeon.bank.application.account.result.OpenAccountResult;
+import site.donghyeon.bank.common.domain.Money;
 import site.donghyeon.bank.domain.account.Account;
 import site.donghyeon.bank.domain.account.port.AccountRepository;
 
@@ -36,5 +39,17 @@ public class AccountService implements AccountUseCase {
         account.close(command.userId());
 
         accountRepository.save(account);
+    }
+
+    @Override
+    @Transactional
+    public DepositResult deposit(DepositCommand command) {
+        Account account = accountRepository.findById(command.accountId());
+
+        account.deposit(new Money(command.amount()));
+
+        return DepositResult.from(
+                accountRepository.save(account)
+        );
     }
 }
