@@ -18,7 +18,7 @@ import site.donghyeon.bank.application.account.result.OpenAccountResult;
 import site.donghyeon.bank.common.domain.Money;
 import site.donghyeon.bank.domain.account.Account;
 import site.donghyeon.bank.domain.account.enums.AccountStatus;
-import site.donghyeon.bank.domain.account.port.AccountRepository;
+import site.donghyeon.bank.application.account.repository.AccountRepository;
 
 @ExtendWith(MockitoExtension.class)
 class AccountUseCaseTest {

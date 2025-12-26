@@ -20,7 +20,7 @@ import site.donghyeon.bank.application.user.result.GetUserInfoResult;
 import site.donghyeon.bank.application.user.result.RegisterResult;
 import site.donghyeon.bank.domain.user.User;
 import site.donghyeon.bank.application.user.exception.EmailAlreadyExistsException;
-import site.donghyeon.bank.domain.user.repository.UserRepository;
+import site.donghyeon.bank.application.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class UserUseCaseTest {

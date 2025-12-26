@@ -1,4 +1,4 @@
-package site.donghyeon.bank.domain.user.repository;
+package site.donghyeon.bank.application.user.repository;
 
 import site.donghyeon.bank.domain.user.User;
 

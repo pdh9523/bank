@@ -2,7 +2,7 @@ package site.donghyeon.bank.infrastructure.jpa.user.adapter;
 
 import org.springframework.stereotype.Repository;
 import site.donghyeon.bank.domain.user.User;
-import site.donghyeon.bank.domain.user.repository.UserRepository;
+import site.donghyeon.bank.application.user.repository.UserRepository;
 import site.donghyeon.bank.infrastructure.jpa.user.entity.UserJpaEntity;
 import site.donghyeon.bank.infrastructure.jpa.user.exception.UserNotFoundException;
 import site.donghyeon.bank.infrastructure.jpa.user.mapper.UserMapper;

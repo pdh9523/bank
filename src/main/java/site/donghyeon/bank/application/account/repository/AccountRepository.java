@@ -1,4 +1,4 @@
-package site.donghyeon.bank.domain.account.port;
+package site.donghyeon.bank.application.account.repository;
 
 import site.donghyeon.bank.domain.account.Account;
 
