@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +54,7 @@ class UserUseCaseTest {
     @Test
     void 유저_조회_테스트() {
         User existing = new User(TEST_USER_ID, TEST_EMAIL);
-        when(userRepository.findById(TEST_USER_ID)).thenReturn(existing);
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(existing));
 
         GetUserInfoCommand command = new GetUserInfoCommand(TEST_USER_ID);
 
