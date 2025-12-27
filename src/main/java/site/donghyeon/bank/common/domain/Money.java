@@ -24,5 +24,13 @@ public record Money(long amount) {
     public boolean exceeded(Money other) {
         return this.amount > other.amount;
     }
+
+    public Money getFee() {
+        return new Money((long) (this.amount * 0.1));
+    }
+
+    public Money withFee() {
+        return new Money((long) (this.amount * 1.1));
+    }
 }
 

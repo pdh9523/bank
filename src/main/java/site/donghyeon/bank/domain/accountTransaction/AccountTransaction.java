@@ -40,6 +40,26 @@ public class AccountTransaction {
         );
     }
 
+    public static AccountTransaction transfer(UUID txId, UUID fromAccountId, UUID toAccountID, Money amount) {
+        return new AccountTransaction(
+                txId,
+                fromAccountId,
+                toAccountID,
+                amount,
+                TransactionType.TRANSFER
+        );
+    }
+
+    public static AccountTransaction fee(AccountTransaction tx) {
+        return new AccountTransaction(
+                tx.getTxId(),
+                tx.getFromAccountId(),
+                null,
+                tx.getAmount().getFee(),
+                TransactionType.FEE
+        );
+    }
+
     public UUID getTxId() {
         return this.txId;
     }
