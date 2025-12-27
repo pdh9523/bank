@@ -31,6 +31,7 @@ public class WithdrawalLimitCacheAdapter implements WithdrawalLimitCache {
         return new Money(used);
     }
 
+    @Override
     public void increase(UUID accountId, Money amount) {
         String key = keyOf(accountId);
         Long newValue = stringRedisTemplate.opsForValue()
