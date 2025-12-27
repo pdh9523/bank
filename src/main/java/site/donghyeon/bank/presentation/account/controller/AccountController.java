@@ -8,8 +8,10 @@ import site.donghyeon.bank.application.account.AccountUseCase;
 import site.donghyeon.bank.presentation.account.request.CloseAccountRequest;
 import site.donghyeon.bank.presentation.account.request.DepositRequest;
 import site.donghyeon.bank.presentation.account.request.OpenAccountRequest;
+import site.donghyeon.bank.presentation.account.request.WithdrawalRequest;
 import site.donghyeon.bank.presentation.account.response.DepositResponse;
 import site.donghyeon.bank.presentation.account.response.OpenAccountResponse;
+import site.donghyeon.bank.presentation.account.response.WithdrawalResponse;
 
 import java.util.UUID;
 
@@ -58,7 +60,7 @@ public class AccountController {
     @Operation(
             summary = "계좌 입금",
             description = "<p>계좌에 금액을 입금합니다.</p>" +
-                    "<p> 입금에 성공한 경우, 거래 내역의 PK를 반환한다. </p>" +
+                    "<p> 입금에 성공한 경우, 거래 내역의 PK를 반환합니다. </p>" +
                     "<p>TODO: 무통장 입금 등을 고려했을 때 잔고 표시 여부에 대한 논의</p>"
     )
     public ResponseEntity<DepositResponse> deposit(
@@ -68,6 +70,24 @@ public class AccountController {
         return ResponseEntity.accepted().body(
                 DepositResponse.from(
                     accountUseCase.deposit(request.toCommand(accountId))
+                )
+        );
+    }
+
+    @PostMapping("/{accountId}/withdrawal")
+    @Operation(
+            summary = "계좌 출금",
+            description = "<p>계좌에서 금액을 출금합니다.</p>" +
+                    "<p> 출금에 성공한 경우, 거래 내역의 PK를 반환합니다. </p>" +
+                    "<p>TODO: 무통장 입금 등을 고려했을 때 잔고 표시 여부에 대한 논의</p>"
+    )
+    public ResponseEntity<WithdrawalResponse> withdrawal(
+            @PathVariable UUID accountId,
+            @RequestBody WithdrawalRequest request
+    ) {
+        return ResponseEntity.accepted().body(
+                WithdrawalResponse.from(
+                        accountUseCase.withdrawal(request.toCommand(accountId))
                 )
         );
     }

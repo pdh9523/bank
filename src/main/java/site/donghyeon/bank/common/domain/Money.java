@@ -20,5 +20,9 @@ public record Money(long amount) {
     public Money subtract(Money other) {
         return new Money(this.amount - other.amount);
     }
+
+    public boolean exceeded(Money other) {
+        return this.amount > other.amount;
+    }
 }
 

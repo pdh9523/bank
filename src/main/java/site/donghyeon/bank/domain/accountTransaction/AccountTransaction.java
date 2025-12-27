@@ -30,6 +30,16 @@ public class AccountTransaction {
         );
     }
 
+    public static AccountTransaction withdrawal(UUID txId, UUID fromAccountId, Money amount) {
+        return new AccountTransaction(
+                txId,
+                fromAccountId,
+                null,
+                amount,
+                TransactionType.WITHDRAW
+        );
+    }
+
     public UUID getTxId() {
         return this.txId;
     }
@@ -49,4 +59,7 @@ public class AccountTransaction {
         return this.transactionType;
     }
 
+    public void markFailed() {
+        this.transactionType = TransactionType.FAIL;
+    }
 }

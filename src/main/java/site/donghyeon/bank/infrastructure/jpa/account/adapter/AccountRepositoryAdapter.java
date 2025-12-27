@@ -31,4 +31,9 @@ public class AccountRepositoryAdapter implements AccountRepository {
         AccountJpaEntity saved = accountJpaRepository.save(entity);
         return AccountMapper.toDomain(saved);
     }
+
+    @Override
+    public boolean existsById(UUID accountId) {
+        return accountJpaRepository.existsById(accountId);
+    }
 }
