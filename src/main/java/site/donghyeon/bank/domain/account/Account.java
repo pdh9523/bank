@@ -39,7 +39,7 @@ public class Account {
 
     public void withdraw(Money money) {
         if (this.balance.amount() < money.amount()) {
-            throw new InsufficientBalanceException(this.balance.amount(), money.amount());
+            throw new InsufficientBalanceException(this.balance, money);
         }
         this.balance = balance.subtract(money);
     }
