@@ -3,6 +3,7 @@ package site.donghyeon.bank.application.account.executor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import site.donghyeon.bank.application.account.cache.WithdrawalLimitCache;
+import site.donghyeon.bank.application.account.exception.AccountNotFoundException;
 import site.donghyeon.bank.application.account.repository.AccountRepository;
 import site.donghyeon.bank.application.account.repository.AccountTransactionRepository;
 import site.donghyeon.bank.application.account.task.WithdrawalTask;
@@ -32,7 +33,8 @@ public class WithdrawalExecutor {
         if (accountTransactionRepository.existsById(task.txId())) return;
 
         // 2. 계좌 확인
-        Account account = accountRepository.findById(task.fromAccountId());
+        Account account = accountRepository.findById(task.fromAccountId())
+                .orElseThrow(() -> new AccountNotFoundException(task.fromAccountId()));
         AccountTransaction tx = AccountTransaction.withdrawal(task.txId(), task.fromAccountId(), task.amount());
 
         try {

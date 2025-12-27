@@ -1,22 +1,20 @@
-package site.donghyeon.bank.application.account;
+package site.donghyeon.bank.application.account.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.donghyeon.bank.application.account.AccountOperationUseCase;
 import site.donghyeon.bank.application.account.cache.WithdrawalLimitCache;
-import site.donghyeon.bank.application.account.command.CloseAccountCommand;
 import site.donghyeon.bank.application.account.command.DepositCommand;
-import site.donghyeon.bank.application.account.command.OpenAccountCommand;
 import site.donghyeon.bank.application.account.command.WithdrawalCommand;
 import site.donghyeon.bank.application.account.exception.AccountNotFoundException;
 import site.donghyeon.bank.application.account.exception.WithdrawalLimitExceededException;
+import site.donghyeon.bank.application.account.repository.AccountRepository;
 import site.donghyeon.bank.application.account.result.DepositResult;
-import site.donghyeon.bank.application.account.result.OpenAccountResult;
 import site.donghyeon.bank.application.account.result.WithdrawalResult;
 import site.donghyeon.bank.application.account.task.DepositTask;
 import site.donghyeon.bank.application.account.task.WithdrawalTask;
 import site.donghyeon.bank.common.domain.Money;
 import site.donghyeon.bank.domain.account.Account;
-import site.donghyeon.bank.application.account.repository.AccountRepository;
 import site.donghyeon.bank.domain.account.exception.InsufficientBalanceException;
 import site.donghyeon.bank.infrastructure.messaging.rabbitmq.deposit.DepositPublisher;
 import site.donghyeon.bank.infrastructure.messaging.rabbitmq.withdraw.WithdrawalPublisher;
@@ -24,46 +22,25 @@ import site.donghyeon.bank.infrastructure.messaging.rabbitmq.withdraw.Withdrawal
 import java.util.UUID;
 
 @Service
-public class AccountService implements AccountUseCase {
-
-    private final AccountRepository accountRepository;
-    private final DepositPublisher depositPublisher;
-    private final WithdrawalLimitCache withdrawalLimitCache;
-    private final WithdrawalPublisher withdrawalPublisher;
+public class AccountOperationService implements AccountOperationUseCase {
 
     private final static Money WITHDRAWAL_LIMIT = new Money(1_000_000);
 
-    public AccountService(
+    private final AccountRepository accountRepository;
+    private final WithdrawalLimitCache withdrawalLimitCache;
+    private final DepositPublisher depositPublisher;
+    private final WithdrawalPublisher withdrawalPublisher;
+
+    public AccountOperationService(
+            WithdrawalLimitCache withdrawalLimitCache,
             AccountRepository accountRepository,
             DepositPublisher depositPublisher,
-            WithdrawalLimitCache withdrawalLimitCache,
             WithdrawalPublisher withdrawalPublisher
     ) {
+        this.withdrawalLimitCache = withdrawalLimitCache;
         this.accountRepository = accountRepository;
         this.depositPublisher = depositPublisher;
-        this.withdrawalLimitCache = withdrawalLimitCache;
         this.withdrawalPublisher = withdrawalPublisher;
-    }
-
-    @Override
-    @Transactional
-    public OpenAccountResult openAccount(OpenAccountCommand command) {
-        return OpenAccountResult.from(
-                accountRepository.save(
-                        Account.open(UUID.randomUUID(), command.userId())
-                )
-        );
-    }
-
-    @Override
-    public void closeAccount(CloseAccountCommand command) {
-        Account account = accountRepository.findById(command.accountId())
-                .orElseThrow(() -> new AccountNotFoundException(command.accountId()));
-        
-        //TODO: 잔액 검증(선택)
-        account.close(command.userId());
-
-        accountRepository.save(account);
     }
 
     @Override

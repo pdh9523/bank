@@ -11,7 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import site.donghyeon.bank.application.account.AccountService;
+import site.donghyeon.bank.application.account.service.AccountService;
 import site.donghyeon.bank.application.account.command.CloseAccountCommand;
 import site.donghyeon.bank.application.account.command.OpenAccountCommand;
 import site.donghyeon.bank.application.account.result.OpenAccountResult;

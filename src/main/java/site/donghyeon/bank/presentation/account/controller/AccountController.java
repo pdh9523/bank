@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.donghyeon.bank.application.account.AccountUseCase;
+import site.donghyeon.bank.application.account.AccountOperationUseCase;
 import site.donghyeon.bank.presentation.account.request.CloseAccountRequest;
 import site.donghyeon.bank.presentation.account.request.DepositRequest;
 import site.donghyeon.bank.presentation.account.request.OpenAccountRequest;
@@ -22,9 +23,14 @@ import java.util.UUID;
 public class AccountController {
 
     private final AccountUseCase accountUseCase;
+    private final AccountOperationUseCase accountOperationUseCase;
 
-    public AccountController(AccountUseCase accountUseCase) {
+    public AccountController(
+            AccountUseCase accountUseCase,
+            AccountOperationUseCase accountOperationUseCase
+    ) {
         this.accountUseCase = accountUseCase;
+        this.accountOperationUseCase = accountOperationUseCase;
     }
 
     @PostMapping()
@@ -69,7 +75,7 @@ public class AccountController {
     ) {
         return ResponseEntity.accepted().body(
                 DepositResponse.from(
-                    accountUseCase.deposit(request.toCommand(accountId))
+                    accountOperationUseCase.deposit(request.toCommand(accountId))
                 )
         );
     }
@@ -87,7 +93,7 @@ public class AccountController {
     ) {
         return ResponseEntity.accepted().body(
                 WithdrawalResponse.from(
-                        accountUseCase.withdrawal(request.toCommand(accountId))
+                        accountOperationUseCase.withdrawal(request.toCommand(accountId))
                 )
         );
     }

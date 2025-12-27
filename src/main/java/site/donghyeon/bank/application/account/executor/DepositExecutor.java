@@ -2,6 +2,7 @@ package site.donghyeon.bank.application.account.executor;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
+import site.donghyeon.bank.application.account.exception.AccountNotFoundException;
 import site.donghyeon.bank.application.account.repository.AccountRepository;
 import site.donghyeon.bank.application.account.repository.AccountTransactionRepository;
 import site.donghyeon.bank.application.account.task.DepositTask;
@@ -28,7 +29,8 @@ public class DepositExecutor {
         if (accountTransactionRepository.existsById(task.txId())) return;
 
         // 2. 입금
-        Account account = accountRepository.findById(task.toAccountId());
+        Account account = accountRepository.findById(task.toAccountId())
+                .orElseThrow(() -> new AccountNotFoundException(task.toAccountId()));
         account.deposit(task.amount());
 
         // 3. 거래 내역 생성
