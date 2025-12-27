@@ -115,7 +115,12 @@ public class AccountOperationService implements AccountOperationUseCase {
             throw new TransferLimitExceededException(spentLimit, transferAmount);
         }
 
-        // 2. 잔고 조회
+        // 2. 상대방 계좌 확인
+        if (!accountRepository.existsById(command.toAccountId())) {
+            throw new AccountNotFoundException(command.toAccountId());
+        }
+
+        // 3. 잔고 조회
         Account account = accountRepository.findById(command.fromAccountId())
                 .orElseThrow(() -> new AccountNotFoundException(command.fromAccountId()));
 
@@ -123,7 +128,7 @@ public class AccountOperationService implements AccountOperationUseCase {
             throw new InsufficientBalanceException(account.getBalance(), transferAmount);
         }
 
-        // 3. 이체 요청 (pub)
+        // 4. 이체 요청 (pub)
         TransferTask task = new TransferTask(
                 UUID.randomUUID(),
                 command.fromAccountId(),
