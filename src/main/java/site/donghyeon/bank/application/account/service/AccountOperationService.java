@@ -30,8 +30,8 @@ import java.util.UUID;
 @Service
 public class AccountOperationService implements AccountOperationUseCase {
 
-    private final static Money WITHDRAWAL_LIMIT = new Money(1_000_000);
-    private final static Money TRANSFER_LIMIT = new Money(3_000_000);
+    public final static Money WITHDRAWAL_LIMIT = new Money(1_000_000);
+    public final static Money TRANSFER_LIMIT = new Money(3_000_000);
 
     private final AccountRepository accountRepository;
     private final WithdrawalLimitCache withdrawalLimitCache;

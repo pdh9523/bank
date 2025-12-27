@@ -6,5 +6,6 @@ import java.util.UUID;
 
 public interface WithdrawalLimitCache {
     Money checkWithdrawalLimit(UUID accountId);
-    void increase(UUID accountId, Money amount);
+    boolean tryConsume(UUID accountId, Money amount, Money limit);
+    void rollback(UUID accountId, Money amount);
 }

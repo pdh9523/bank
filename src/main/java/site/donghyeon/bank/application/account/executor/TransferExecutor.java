@@ -10,6 +10,8 @@ import site.donghyeon.bank.domain.account.Account;
 import site.donghyeon.bank.domain.account.exception.InsufficientBalanceException;
 import site.donghyeon.bank.domain.accountTransaction.AccountTransaction;
 
+import static site.donghyeon.bank.application.account.service.AccountOperationService.TRANSFER_LIMIT;
+
 @Component
 public class TransferExecutor {
 
@@ -27,16 +29,12 @@ public class TransferExecutor {
     }
 
     public void execute(TransferTask task) {
-        System.out.println(11);
         // 1. 멱등성 처리
         if (accountTransactionRepository.existsByEventId(task.eventId())) return;
 
         // 2. 계좌 확인 ( from -> to )
         Account fromAccount = accountRepository.findById(task.fromAccountId())
                 .orElseThrow(() -> new AccountNotFoundException(task.fromAccountId()));
-
-        Account toAccount = accountRepository.findById(task.toAccountId())
-                .orElseThrow(() -> new AccountNotFoundException(task.toAccountId()));
 
         AccountTransaction txFrom = AccountTransaction.transferFrom(
                 task.eventId(),
@@ -56,26 +54,35 @@ public class TransferExecutor {
                 task.amount().getFee()
         );
 
-        try {
-            // 3. from 계좌에서 출금 (수수료 포함)
-            fromAccount.withdraw(task.amount().withFee());
-            // 4. to 계좌에서 입금
-            toAccount.deposit(task.amount());
-
-            // 6. 이체 내역 저장
-            accountRepository.save(fromAccount);
-            accountRepository.save(toAccount);
-
-            accountTransactionRepository.save(txFrom);
-            accountTransactionRepository.save(txTo);
-            accountTransactionRepository.save(txFee);
-
-            // 7. 이체 한도 수정
-            transferLimitCache.increase(task.fromAccountId(), task.amount());
-        } catch (InsufficientBalanceException e) {
-            // 3-1 출금 실패 시 실패 내역 저장 (보내는 사람에게만)
+        if (!transferLimitCache.tryConsume(task.fromAccountId(), task.amount(), TRANSFER_LIMIT)) {
             txFrom.markFailed();
-            accountTransactionRepository.save(txFrom);
+        } else {
+            try {
+                // 2-1. 받는 사람 계좌 확인
+                Account toAccount = accountRepository.findById(task.toAccountId())
+                        .orElseThrow(() -> new AccountNotFoundException(task.toAccountId()));
+
+                // 3. from 계좌에서 출금 (수수료 포함)
+                fromAccount.withdraw(task.amount().withFee());
+                // 4. to 계좌에서 입금
+                toAccount.deposit(task.amount());
+
+                // 6. 이체 내역 저장
+                accountRepository.save(fromAccount);
+                accountRepository.save(toAccount);
+
+                accountTransactionRepository.save(txTo);
+                accountTransactionRepository.save(txFee);
+            } catch (InsufficientBalanceException e) {
+                // 3-1 출금 실패 시 실패 내역 저장 (보내는 사람에게만)
+                txFrom.markFailed();
+                transferLimitCache.rollback(task.fromAccountId(), task.amount());
+            } catch (AccountNotFoundException e) {
+                // 2-2. 받는 사람 계좌 없을 시 실패 처리
+                txFrom.markFailed();
+                transferLimitCache.rollback(task.fromAccountId(), task.amount());
+            }
         }
+        accountTransactionRepository.save(txFrom);
     }
 }

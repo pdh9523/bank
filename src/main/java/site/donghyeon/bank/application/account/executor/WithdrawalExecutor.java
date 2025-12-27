@@ -11,6 +11,8 @@ import site.donghyeon.bank.domain.account.Account;
 import site.donghyeon.bank.domain.account.exception.InsufficientBalanceException;
 import site.donghyeon.bank.domain.accountTransaction.AccountTransaction;
 
+import static site.donghyeon.bank.application.account.service.AccountOperationService.WITHDRAWAL_LIMIT;
+
 @Component
 @Transactional
 public class WithdrawalExecutor {
@@ -42,19 +44,21 @@ public class WithdrawalExecutor {
                 task.amount()
         );
 
-        try {
-            // 3. 출금 시도
-            account.withdraw(task.amount());
-            // 4. 출금 내역 저장
-            accountRepository.save(account);
-            accountTransactionRepository.save(tx);
-            // 5. 출금 한도 수정
-            withdrawalLimitCache.increase(task.accountId(), task.amount());
-        } catch (InsufficientBalanceException e) {
-            // 3-1. 출금 시도 실패 시 실패 내역 저장
+        if (!withdrawalLimitCache.tryConsume(task.accountId(), task.amount(), WITHDRAWAL_LIMIT)) {
+            //TODO: 한도 초과로 인한 실패 별도 구분자로 표시
             tx.markFailed();
-            accountTransactionRepository.save(tx);
+        } else {
+            try {
+                // 3. 출금 시도
+                account.withdraw(task.amount());
+                // 4. 출금 내역 저장
+                accountRepository.save(account);
+            } catch (InsufficientBalanceException e) {
+                // 3-1. 출금 시도 실패 시 실패 내역 저장
+                tx.markFailed();
+                withdrawalLimitCache.rollback(task.accountId(), task.amount());
+            }
         }
-        //TODO: redis incrby 실패 시 동작 구현
+        accountTransactionRepository.save(tx);
     }
 }
