@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +24,8 @@ import site.donghyeon.bank.application.account.repository.AccountRepository;
 @ExtendWith(MockitoExtension.class)
 class AccountUseCaseTest {
 
-    private static final UUID USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-    private static final UUID ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    private static final UUID TEST_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final UUID TEST_ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000002");
 
     @Mock
     private AccountRepository accountRepository;
@@ -34,26 +35,26 @@ class AccountUseCaseTest {
 
     @Test
     void 계좌_개설_테스트() {
-        Account saved = new Account(ACCOUNT_ID, USER_ID, Money.zero(), AccountStatus.OPEN);
+        Account saved = new Account(TEST_ACCOUNT_ID, TEST_USER_ID, Money.zero(), AccountStatus.OPEN);
         when(accountRepository.save(any(Account.class))).thenReturn(saved);
 
-        OpenAccountResult result = accountService.openAccount(new OpenAccountCommand(USER_ID));
+        OpenAccountResult result = accountService.openAccount(new OpenAccountCommand(TEST_USER_ID));
 
-        assertThat(result.accountId()).isEqualTo(ACCOUNT_ID);
+        assertThat(result.accountId()).isEqualTo(TEST_ACCOUNT_ID);
         assertThat(result.balance().amount()).isZero();
         verify(accountRepository).save(any(Account.class));
     }
 
     @Test
     void 계좌_해지_테스트() {
-        Account existing = new Account(ACCOUNT_ID, USER_ID, Money.zero(), AccountStatus.OPEN);
-        when(accountRepository.findById(ACCOUNT_ID)).thenReturn(existing);
+        Account existing = new Account(TEST_ACCOUNT_ID, TEST_USER_ID, Money.zero(), AccountStatus.OPEN);
+        when(accountRepository.findById(TEST_ACCOUNT_ID)).thenReturn(Optional.of(existing));
         when(accountRepository.save(existing)).thenReturn(existing);
 
-        accountService.closeAccount(new CloseAccountCommand(USER_ID, ACCOUNT_ID));
+        accountService.closeAccount(new CloseAccountCommand(TEST_USER_ID, TEST_ACCOUNT_ID));
 
         assertThat(existing.getStatus()).isEqualTo(AccountStatus.CLOSED);
-        verify(accountRepository).findById(ACCOUNT_ID);
+        verify(accountRepository).findById(TEST_ACCOUNT_ID);
         verify(accountRepository).save(existing);
     }
 }
