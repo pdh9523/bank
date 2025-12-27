@@ -10,13 +10,13 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Component
-public class WithdrawalCacheAdapter implements WithdrawalLimitCache {
+public class WithdrawalLimitCacheAdapter implements WithdrawalLimitCache {
 
     private static final Duration TTL = Duration.ofDays(1);
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    public WithdrawalCacheAdapter(StringRedisTemplate stringRedisTemplate) {
+    public WithdrawalLimitCacheAdapter(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
