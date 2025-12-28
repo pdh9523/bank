@@ -34,7 +34,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @Testcontainers
-@SpringBootTest
+@SpringBootTest(
+        properties = {
+                "spring.flyway.enabled=false",
+                "spring.jpa.hibernate.ddl-auto=none",
+                "spring.jpa.generate-ddl=false"
+        }
+)
 public class RabbitMQPublisherTest {
 
     private static final UUID TEST_ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
