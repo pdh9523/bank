@@ -41,7 +41,8 @@ public class WithdrawalExecutor {
         AccountTransaction tx = AccountTransaction.withdrawal(
                 task.eventId(),
                 task.accountId(),
-                task.amount()
+                task.amount(),
+                account.getBalance()
         );
 
         if (!withdrawalLimitCache.tryConsume(task.accountId(), task.amount(), WITHDRAWAL_LIMIT)) {
@@ -51,6 +52,12 @@ public class WithdrawalExecutor {
             try {
                 // 3. 출금 시도
                 account.withdraw(task.amount());
+                tx = AccountTransaction.withdrawal(
+                        task.eventId(),
+                        task.accountId(),
+                        task.amount(),
+                        account.getBalance()
+                );
                 // 4. 출금 내역 저장
                 accountRepository.save(account);
             } catch (InsufficientBalanceException e) {

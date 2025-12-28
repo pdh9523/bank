@@ -39,19 +39,8 @@ public class TransferExecutor {
         AccountTransaction txFrom = AccountTransaction.transferFrom(
                 task.eventId(),
                 task.fromAccountId(),
-                task.amount()
-        );
-
-        AccountTransaction txTo = AccountTransaction.transferTo(
-                task.eventId(),
-                task.toAccountId(),
-                task.amount()
-        );
-
-        AccountTransaction txFee = AccountTransaction.fee(
-                task.eventId(),
-                task.fromAccountId(),
-                task.amount().getFee()
+                task.amount(),
+                fromAccount.getBalance()
         );
 
         if (!transferLimitCache.tryConsume(task.fromAccountId(), task.amount(), TRANSFER_LIMIT)) {
@@ -62,27 +51,51 @@ public class TransferExecutor {
                 Account toAccount = accountRepository.findById(task.toAccountId())
                         .orElseThrow(() -> new AccountNotFoundException(task.toAccountId()));
 
-                // 3. from 계좌에서 출금 (수수료 포함)
-                fromAccount.withdraw(task.amount().withFee());
-                // 4. to 계좌에서 입금
+                // 3. from 계좌에서 출금
+                fromAccount.withdraw(task.amount());
+                txFrom = AccountTransaction.transferFrom(
+                        task.eventId(),
+                        task.fromAccountId(),
+                        task.amount(),
+                        fromAccount.getBalance()
+                );
+
+                // 4. from 계좌에서 수수료 출금
+                fromAccount.withdraw(task.amount().getFee());
+                AccountTransaction txFee = AccountTransaction.fee(
+                        task.eventId(),
+                        task.fromAccountId(),
+                        task.amount().getFee(),
+                        fromAccount.getBalance()
+                );
+
+                // 5. to 계좌에 입금
                 toAccount.deposit(task.amount());
+                AccountTransaction txTo = AccountTransaction.transferTo(
+                        task.eventId(),
+                        task.toAccountId(),
+                        task.amount(),
+                        toAccount.getBalance()
+                );
 
                 // 6. 이체 내역 저장
                 accountRepository.save(fromAccount);
                 accountRepository.save(toAccount);
 
-                accountTransactionRepository.save(txTo);
+                accountTransactionRepository.save(txFrom);
                 accountTransactionRepository.save(txFee);
+                accountTransactionRepository.save(txTo);
             } catch (InsufficientBalanceException e) {
                 // 3-1 출금 실패 시 실패 내역 저장 (보내는 사람에게만)
                 txFrom.markFailed();
                 transferLimitCache.rollback(task.fromAccountId(), task.amount());
+                accountTransactionRepository.save(txFrom);
             } catch (AccountNotFoundException e) {
                 // 2-2. 받는 사람 계좌 없을 시 실패 처리
                 txFrom.markFailed();
                 transferLimitCache.rollback(task.fromAccountId(), task.amount());
+                accountTransactionRepository.save(txFrom);
             }
         }
-        accountTransactionRepository.save(txFrom);
     }
 }

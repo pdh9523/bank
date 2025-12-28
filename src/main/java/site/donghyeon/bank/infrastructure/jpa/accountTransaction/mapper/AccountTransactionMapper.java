@@ -12,6 +12,7 @@ public final class AccountTransactionMapper {
                 entity.getAccountId(),
                 entity.getEventId(),
                 new Money(entity.getAmount()),
+                new Money(entity.getBalance()),
                 entity.getTransactionType()
         );
     }
@@ -22,6 +23,7 @@ public final class AccountTransactionMapper {
                 tx.getAccountId(),
                 tx.getEventId(),
                 tx.getAmount().amount(),
+                tx.getBalance().amount(),
                 tx.getTransactionType()
         );
     }

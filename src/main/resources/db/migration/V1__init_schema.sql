@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS account_transactions (
                                                     account_id UUID NOT NULL,
                                                     event_id UUID NOT NULL,
                                                     amount BIGINT NOT NULL,
+                                                    balance BIGINT NOT NULL,
                                                     transaction_type transaction_type NOT NULL,
 
                                                     created_at TIMESTAMP NOT NULL DEFAULT now(),
@@ -125,21 +126,6 @@ CREATE INDEX IF NOT EXISTS idx_tx_account_id
 -- 멱등성 보장 (이벤트 + 계좌 + 타입)
 CREATE UNIQUE INDEX IF NOT EXISTS uq_tx_event_account_type
     ON account_transactions (event_id, account_id, transaction_type);
-
--- 금액 무결성
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM pg_constraint
-        WHERE conname = 'chk_tx_amount_positive'
-    ) THEN
-ALTER TABLE account_transactions
-    ADD CONSTRAINT chk_tx_amount_positive
-        CHECK (amount > 0);
-END IF;
-END $$;
-
 
 -- =========================================================
 -- END

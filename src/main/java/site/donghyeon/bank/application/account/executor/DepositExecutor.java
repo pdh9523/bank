@@ -31,10 +31,11 @@ public class DepositExecutor {
         // 2. 입금
         Account account = accountRepository.findById(task.accountId())
                 .orElseThrow(() -> new AccountNotFoundException(task.accountId()));
+
         account.deposit(task.amount());
 
         // 3. 거래 내역 생성
-        AccountTransaction tx = AccountTransaction.deposit(task.eventId(), task.accountId(), task.amount());
+        AccountTransaction tx = AccountTransaction.deposit(task.eventId(), task.accountId(), task.amount(), account.getBalance());
 
         // 4. DB 저장
         accountRepository.save(account);
