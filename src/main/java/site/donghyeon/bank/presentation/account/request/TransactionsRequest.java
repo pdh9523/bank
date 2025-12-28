@@ -1,0 +1,23 @@
+package site.donghyeon.bank.presentation.account.request;
+
+import site.donghyeon.bank.application.account.query.TransactionsQuery;
+import site.donghyeon.bank.presentation.exception.BadRequestException;
+
+import java.util.UUID;
+
+public record TransactionsRequest(
+        Integer page,
+        Integer size
+) {
+    public TransactionsQuery toQuery(UUID accountId) {
+        if (accountId == null) {
+            throw new BadRequestException("accountId is null");
+        }
+
+        return new TransactionsQuery(
+                accountId,
+                this.page == null ? 0 : page,
+                this.size == null ? 20 : size
+        );
+    }
+}

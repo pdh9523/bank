@@ -4,13 +4,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import site.donghyeon.bank.application.account.AccountTransactionUseCase;
 import site.donghyeon.bank.application.account.AccountUseCase;
 import site.donghyeon.bank.application.account.AccountOperationUseCase;
 import site.donghyeon.bank.presentation.account.request.*;
-import site.donghyeon.bank.presentation.account.response.DepositResponse;
-import site.donghyeon.bank.presentation.account.response.OpenAccountResponse;
-import site.donghyeon.bank.presentation.account.response.TransferResponse;
-import site.donghyeon.bank.presentation.account.response.WithdrawalResponse;
+import site.donghyeon.bank.presentation.account.response.*;
 
 import java.util.UUID;
 
@@ -22,13 +20,16 @@ public class AccountController {
 
     private final AccountUseCase accountUseCase;
     private final AccountOperationUseCase accountOperationUseCase;
+    private final AccountTransactionUseCase accountTransactionUseCase;
 
     public AccountController(
             AccountUseCase accountUseCase,
-            AccountOperationUseCase accountOperationUseCase
+            AccountOperationUseCase accountOperationUseCase,
+            AccountTransactionUseCase accountTransactionUseCase
     ) {
         this.accountUseCase = accountUseCase;
         this.accountOperationUseCase = accountOperationUseCase;
+        this.accountTransactionUseCase = accountTransactionUseCase;
     }
 
     @PostMapping()
@@ -108,6 +109,24 @@ public class AccountController {
         return ResponseEntity.accepted().body(
                 TransferResponse.from(
                         accountOperationUseCase.transfer(request.toCommand(accountId))
+                )
+        );
+    }
+
+    @GetMapping("/{accountId}/transactions")
+    @Operation(
+            summary = "거래 내역 조회",
+            description = "<p>계좌의 거래 내역을 조회합니다.</p>"
+    )
+    public ResponseEntity<TransactionsResponse> getTransactions(
+            @PathVariable UUID accountId,
+            @ModelAttribute TransactionsRequest request
+    ) {
+        return ResponseEntity.ok(
+                TransactionsResponse.from(
+                        accountTransactionUseCase.getTransactions(
+                                request.toQuery(accountId)
+                        )
                 )
         );
     }

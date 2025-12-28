@@ -1,7 +1,13 @@
 package site.donghyeon.bank.infrastructure.jpa.accountTransaction.adapter;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
+import site.donghyeon.bank.application.account.query.TransactionsQuery;
 import site.donghyeon.bank.application.account.repository.AccountTransactionRepository;
+import site.donghyeon.bank.application.account.result.TransactionsResult;
 import site.donghyeon.bank.domain.accountTransaction.AccountTransaction;
 import site.donghyeon.bank.infrastructure.jpa.accountTransaction.entity.AccountTransactionJpaEntity;
 import site.donghyeon.bank.infrastructure.jpa.accountTransaction.mapper.AccountTransactionMapper;
@@ -24,6 +30,27 @@ public class AccountTransactionRepositoryAdapter implements AccountTransactionRe
         AccountTransactionJpaEntity entity = AccountTransactionMapper.toEntity(tx);
         AccountTransactionJpaEntity saved = accountTransactionJpaRepository.save(entity);
         return AccountTransactionMapper.toDomain(saved);
+    }
+
+    @Override
+    public TransactionsResult findByAccountId(TransactionsQuery query) {
+        Pageable pageable = PageRequest.of(
+                query.page(),
+                query.size(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<AccountTransactionJpaEntity> page =
+                accountTransactionJpaRepository.findByAccountId(query.accountId(), pageable);
+
+        return new TransactionsResult(
+                page.getContent().stream()
+                        .map(AccountTransactionMapper::toTransactionsView)
+                        .toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements()
+        );
     }
 
     @Override
