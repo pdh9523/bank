@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    properties:
-      hibernate:
-        format_sql: create-drop
+      ddl-auto: none
+
+  flyway:
+    enabled: true
