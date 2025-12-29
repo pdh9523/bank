@@ -1,6 +1,7 @@
 package site.donghyeon.bank.presentation.account.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,7 @@ public class AccountController {
             description = "<p>계좌를 개설합니다.</p>"
     )
     public ResponseEntity<OpenAccountResponse> openAccount(
+            @Parameter(hidden = true)
             @GetClaims CurrentUser currentUser
     ) {
         return ResponseEntity.ok(
@@ -55,6 +57,7 @@ public class AccountController {
             description = "<p>계좌를 해지합니다.</p>"
     )
     public ResponseEntity<Void> closeAccount(
+            @Parameter(hidden = true)
             @GetClaims CurrentUser currentUser,
             @RequestBody CloseAccountRequest request
     ) {
@@ -87,6 +90,7 @@ public class AccountController {
                     "<p> 출금에 성공한 경우, 거래 내역의 PK를 반환합니다. </p>"
     )
     public ResponseEntity<WithdrawalResponse> withdrawal(
+            @Parameter(hidden = true)
             @GetClaims CurrentUser currentUser,
             @PathVariable UUID accountId,
             @RequestBody WithdrawalRequest request
@@ -105,6 +109,7 @@ public class AccountController {
                     "<p> 이체에 성공한 경우, 거래 내역의 PK를 반환합니다. </p>"
     )
     public ResponseEntity<TransferResponse> transfer(
+            @Parameter(hidden = true)
             @GetClaims CurrentUser currentUser,
             @PathVariable UUID accountId,
             @RequestBody TransferRequest request
@@ -122,6 +127,7 @@ public class AccountController {
             description = "<p>계좌의 거래 내역을 조회합니다.</p>"
     )
     public ResponseEntity<TransactionsResponse> getTransactions(
+            @Parameter(hidden = true)
             @GetClaims CurrentUser currentUser,
             @PathVariable UUID accountId,
             @ModelAttribute TransactionsRequest request

@@ -1,6 +1,7 @@
 package site.donghyeon.bank.presentation.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +31,10 @@ public class UserController {
                     "<div> 회원 가입 후 한 번 실행해야 합니다. </div>"
     )
     public ResponseEntity<GetUserInfoResponse> getUserInfo(
+            @Parameter(hidden = true)
             @GetClaims CurrentUser currentUser
             ) {
+        System.out.println(currentUser);
         return ResponseEntity.ok(
                 GetUserInfoResponse.from(
                         userUseCase.getUserInfo(
