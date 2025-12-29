@@ -6,7 +6,7 @@ import site.donghyeon.bank.domain.accountTransaction.enums.TransactionType;
 import java.time.Instant;
 import java.util.UUID;
 
-public record TransactionsView(
+public record TransactionView(
         UUID eventId,
         Instant createdAt,
         TransactionType type,

@@ -178,4 +178,24 @@ public class AccountController {
                 )
         );
     }
+
+    @GetMapping("/{accountId}/transactions/{eventId}")
+    @Operation(
+            summary = "계좌 거래 이벤트 조회",
+            description = "<p>특정 거래 이벤트를 조회합니다.</p>"
+    )
+    public ResponseEntity<TransactionEventResponse> getTransactionEvent(
+            @Parameter(hidden = true)
+            @GetClaims CurrentUser currentUser,
+            @PathVariable UUID accountId,
+            @PathVariable UUID eventId
+    ) {
+        return ResponseEntity.ok(
+                TransactionEventResponse.from(
+                        accountTransactionUseCase.getTransactionEvent(
+                                TransactionEventRequest.of(currentUser.userId(), accountId, eventId).toQuery()
+                        )
+                )
+        );
+    }
 }

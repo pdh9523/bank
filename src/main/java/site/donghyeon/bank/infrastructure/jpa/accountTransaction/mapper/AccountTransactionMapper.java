@@ -1,6 +1,6 @@
 package site.donghyeon.bank.infrastructure.jpa.accountTransaction.mapper;
 
-import site.donghyeon.bank.application.account.transaction.view.TransactionsView;
+import site.donghyeon.bank.application.account.transaction.view.TransactionView;
 import site.donghyeon.bank.common.domain.Money;
 import site.donghyeon.bank.domain.accountTransaction.AccountTransaction;
 import site.donghyeon.bank.infrastructure.jpa.accountTransaction.entity.AccountTransactionJpaEntity;
@@ -29,8 +29,8 @@ public final class AccountTransactionMapper {
         );
     }
 
-    public static TransactionsView toTransactionsView(AccountTransactionJpaEntity entity) {
-        return new TransactionsView(
+    public static TransactionView toTransactionView(AccountTransactionJpaEntity entity) {
+        return new TransactionView(
                 entity.getEventId(),
                 entity.getCreatedAt(),
                 entity.getTransactionType(),

@@ -8,10 +8,12 @@ import org.springframework.stereotype.Repository;
 import site.donghyeon.bank.application.account.transaction.query.TransactionsQuery;
 import site.donghyeon.bank.application.account.support.repository.AccountTransactionRepository;
 import site.donghyeon.bank.application.account.transaction.result.TransactionsResult;
+import site.donghyeon.bank.application.account.transaction.view.TransactionView;
 import site.donghyeon.bank.domain.accountTransaction.AccountTransaction;
 import site.donghyeon.bank.infrastructure.jpa.accountTransaction.entity.AccountTransactionJpaEntity;
 import site.donghyeon.bank.infrastructure.jpa.accountTransaction.mapper.AccountTransactionMapper;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -45,12 +47,19 @@ public class AccountTransactionRepositoryAdapter implements AccountTransactionRe
 
         return new TransactionsResult(
                 page.getContent().stream()
-                        .map(AccountTransactionMapper::toTransactionsView)
+                        .map(AccountTransactionMapper::toTransactionView)
                         .toList(),
                 page.getNumber(),
                 page.getSize(),
                 page.getTotalElements()
         );
+    }
+
+    @Override
+    public List<TransactionView> findByAccountIdAndEventId(UUID accountId, UUID eventId) {
+        return accountTransactionJpaRepository.findByAccountIdAndEventId(accountId, eventId).stream()
+                .map(AccountTransactionMapper::toTransactionView)
+                .toList();
     }
 
     @Override

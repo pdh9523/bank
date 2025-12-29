@@ -9,6 +9,7 @@ import site.donghyeon.bank.domain.accountTransaction.enums.TransactionType;
 import site.donghyeon.bank.infrastructure.jpa.accountTransaction.entity.AccountTransactionJpaEntity;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public interface AccountTransactionJpaRepository extends JpaRepository<AccountTransactionJpaEntity, UUID> {
@@ -29,4 +30,5 @@ public interface AccountTransactionJpaRepository extends JpaRepository<AccountTr
             @Param("from") Instant from,
             @Param("to") Instant to
     );
+    List<AccountTransactionJpaEntity> findByAccountIdAndEventId(UUID accountId, UUID eventId);
 }

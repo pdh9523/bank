@@ -4,10 +4,7 @@ import site.donghyeon.bank.application.account.transaction.view.TransactionView;
 
 import java.util.List;
 
-public record TransactionsResult(
-        List<TransactionView> accountTransactions,
-        int page,
-        int size,
-        long total
+public record TransactionEventResult(
+    List<TransactionView> accountTransactions
 ) {
 }
