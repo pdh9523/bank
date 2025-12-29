@@ -112,6 +112,8 @@ public class TransferExecutorTest {
     void 받는_계좌가_없으면_예외_발생() {
         given(accountTransactionRepository.existsByEventId(TEST_EVENT_ID)).willReturn(false);
         given(accountRepository.findById(TEST_ACCOUNT_ID)).willReturn(Optional.of(TEST_ACCOUNT));
+
+        given(transferLimitCache.tryConsume(any(UUID.class), any(Money.class), any(Money.class))).willReturn(true);
         given(accountRepository.findById(OTHER_ACCOUNT_ID)).willReturn(Optional.empty());
 
         transferExecutor.execute(TEST_TASK);
@@ -120,10 +122,23 @@ public class TransferExecutorTest {
     }
 
     @Test
-    void 금액_초과_시_예외_발생() {
+    void 잔고_초과_시_예외_발생() {
         given(accountTransactionRepository.existsByEventId(TEST_EVENT_ID)).willReturn(false);
         given(accountRepository.findById(TEST_ACCOUNT_ID)).willReturn(Optional.of(TEST_ACCOUNT_WITH_ZERO));
         given(accountRepository.findById(OTHER_ACCOUNT_ID)).willReturn(Optional.of(OTHER_ACCOUNT));
+        given(transferLimitCache.tryConsume(any(UUID.class), any(Money.class), any(Money.class))).willReturn(true);
+
+        transferExecutor.execute(TEST_TASK);
+
+        then(accountRepository).shouldHaveNoMoreInteractions();
+        then(accountTransactionRepository).should().save(any(AccountTransaction.class));
+    }
+
+    @Test
+    void 이체_한도_초과_시_예외_발생() {
+        given(accountTransactionRepository.existsByEventId(TEST_EVENT_ID)).willReturn(false);
+        given(accountRepository.findById(TEST_ACCOUNT_ID)).willReturn(Optional.of(TEST_ACCOUNT_WITH_ZERO));
+        given(transferLimitCache.tryConsume(any(UUID.class), any(Money.class), any(Money.class))).willReturn(false);
 
         transferExecutor.execute(TEST_TASK);
 
