@@ -120,8 +120,8 @@ CREATE TABLE IF NOT EXISTS account_transactions (
     );
 
 -- 계좌별 거래 조회
-CREATE INDEX IF NOT EXISTS idx_tx_account_id
-    ON account_transactions (account_id);
+CREATE INDEX IF NOT EXISTS idx_tx_account_id_created_at_desc
+    ON account_transactions (account_id, created_at DESC);
 
 -- 멱등성 보장 (이벤트 + 계좌 + 타입)
 CREATE UNIQUE INDEX IF NOT EXISTS uq_tx_event_account_type
