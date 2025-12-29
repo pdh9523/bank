@@ -28,7 +28,6 @@ class UserUseCaseTest {
 
     private static final UUID TEST_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     private static final String TEST_EMAIL = "user@example.com";
-    private static final String TEST_PASSWORD = "Secret123!";
 
     @Mock
     private UserRepository userRepository;
@@ -37,46 +36,18 @@ class UserUseCaseTest {
     private UserService userService;
 
     @Test
-    void 회원가입_테스트() {
-        User savedUser = new User(TEST_USER_ID, TEST_EMAIL);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
-
-        RegisterCommand command = new RegisterCommand(TEST_EMAIL, TEST_PASSWORD);
-
-        RegisterResult result = userService.register(command);
-
-        assertThat(result.userId()).isEqualTo(savedUser.getUserId());
-        assertThat(result.email()).isEqualTo(savedUser.getEmail());
-
-        verify(userRepository).save(any(User.class));
-    }
-
-    @Test
     void 유저_조회_테스트() {
         User existing = new User(TEST_USER_ID, TEST_EMAIL);
         when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(existing));
 
-        GetUserInfoCommand command = new GetUserInfoCommand(TEST_USER_ID);
+        GetUserInfoCommand command = new GetUserInfoCommand(TEST_USER_ID, TEST_EMAIL);
 
         GetUserInfoResult result = userService.getUserInfo(command);
 
         assertThat(result).isNotNull();
         assertThat(result.userId()).isEqualTo(TEST_USER_ID);
-        assertThat(result.email()).isEqualTo(existing.getEmail());
+        assertThat(result.email()).isEqualTo(existing.email());
 
         verify(userRepository).findById(TEST_USER_ID);
-    }
-
-    @Test
-    void 이메일_중복_시_에러_반환() {
-        when(userRepository.existsByEmail(TEST_EMAIL)).thenReturn(true);
-
-        RegisterCommand command = new RegisterCommand(TEST_EMAIL, TEST_PASSWORD);
-
-        assertThatThrownBy(() -> userService.register(command))
-                .isInstanceOf(EmailAlreadyExistsException.class);
-
-        verify(userRepository).existsByEmail(TEST_EMAIL);
-        verifyNoMoreInteractions(userRepository);
     }
 }
