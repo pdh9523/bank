@@ -2,7 +2,7 @@ package site.donghyeon.bank.presentation.user.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import site.donghyeon.bank.application.user.command.GetUserInfoCommand;
-import site.donghyeon.bank.presentation.resolver.CurrentUser;
+import site.donghyeon.bank.presentation.common.resolver.CurrentUser;
 
 import java.util.UUID;
 

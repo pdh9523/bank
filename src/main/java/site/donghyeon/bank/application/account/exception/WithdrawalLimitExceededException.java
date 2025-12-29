@@ -1,9 +1,9 @@
 package site.donghyeon.bank.application.account.exception;
 
 import site.donghyeon.bank.common.domain.Money;
-import site.donghyeon.bank.common.exception.ApplicationException;
+import site.donghyeon.bank.common.exception.BadRequestException;
 
-public class WithdrawalLimitExceededException extends ApplicationException {
+public class WithdrawalLimitExceededException extends BadRequestException {
     public WithdrawalLimitExceededException(Money spentLimit, Money requested) {
         super("Withdrawal limit exceeded, (spent: %d, requested: %d)"
                 .formatted(

@@ -1,7 +1,7 @@
 package site.donghyeon.bank.presentation.account.request;
 
 import site.donghyeon.bank.application.account.query.TransactionsQuery;
-import site.donghyeon.bank.presentation.exception.BadRequestException;
+import site.donghyeon.bank.common.exception.BadRequestException;
 
 import java.util.UUID;
 
