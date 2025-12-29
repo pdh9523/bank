@@ -20,6 +20,7 @@ public interface AccountTransactionJpaRepository extends JpaRepository<AccountTr
         select coalesce(sum(t.amount), 0)
         from AccountTransactionJpaEntity t
         where t.accountId = :accountId
+          and t.amount < 0
           and t.transactionType = :txType
           and t.createdAt >= :from
           and t.createdAt < :to

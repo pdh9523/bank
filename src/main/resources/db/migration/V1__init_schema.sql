@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS users (
                                      email VARCHAR(255) NOT NULL UNIQUE,
     status user_status NOT NULL,
 
-    created_at TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP NOT NULL DEFAULT now()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
 
 
@@ -66,8 +66,8 @@ CREATE TABLE IF NOT EXISTS accounts (
                                         balance BIGINT NOT NULL,
                                         status account_status NOT NULL,
 
-                                        created_at TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP NOT NULL DEFAULT now(),
+                                        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     CONSTRAINT fk_accounts_user
     FOREIGN KEY (user_id)
@@ -111,8 +111,8 @@ CREATE TABLE IF NOT EXISTS account_transactions (
                                                     balance BIGINT NOT NULL,
                                                     transaction_type transaction_type NOT NULL,
 
-                                                    created_at TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP NOT NULL DEFAULT now(),
+                                                    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     CONSTRAINT fk_tx_account
     FOREIGN KEY (account_id)

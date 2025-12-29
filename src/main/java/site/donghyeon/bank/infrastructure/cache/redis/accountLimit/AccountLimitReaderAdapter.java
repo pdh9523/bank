@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import site.donghyeon.bank.application.account.limit.AccountLimitReader;
 import site.donghyeon.bank.common.domain.Money;
+import site.donghyeon.bank.common.utils.TimePolicy;
 import site.donghyeon.bank.domain.accountTransaction.enums.LimitType;
 import site.donghyeon.bank.infrastructure.jpa.accountTransaction.adapter.AccountLimitJpaAdapter;
 
@@ -58,7 +59,7 @@ public class AccountLimitReaderAdapter implements AccountLimitReader {
 
     private String keyOf(UUID accountId, LimitType type) {
         return "limit:%s:daily:%s:%s"
-                .formatted(type.toString().toLowerCase(), accountId, LocalDate.now());
+                .formatted(type.toString().toLowerCase(), accountId, LocalDate.now(TimePolicy.KST));
     };
 
     //TODO: 장애 시 서킷브레이커 패턴 적용 가능성
@@ -70,7 +71,7 @@ public class AccountLimitReaderAdapter implements AccountLimitReader {
         }
 
         Money limitFromDB = limitJpaAdapter.readDailyLimit(accountId, type);
-        stringRedisTemplate.opsForValue().set(key, String.valueOf(limitFromDB), TTL);
+        stringRedisTemplate.opsForValue().set(key, String.valueOf(limitFromDB.amount()), TTL);
 
         return limitFromDB;
     }
