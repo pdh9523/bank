@@ -1,17 +1,18 @@
 package site.donghyeon.bank.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import site.donghyeon.bank.common.domain.Money;
 import site.donghyeon.bank.domain.account.Account;
+import site.donghyeon.bank.domain.account.exception.AccountAccessDeniedException;
 import site.donghyeon.bank.domain.account.exception.InsufficientBalanceException;
+
+import static org.assertj.core.api.Assertions.*;
 
 class AccountDomainTest {
 
     private static final UUID TEST_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private static final UUID OTHER_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private static final UUID TEST_ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     @Test
@@ -38,6 +39,23 @@ class AccountDomainTest {
         account.withdraw(new Money(100));
 
         assertThat(account.getBalance().amount()).isEqualTo(900L);
+    }
+
+    @Test
+    void 계좌_소유권_테스트() {
+        Account account = Account.open(TEST_ACCOUNT_ID, TEST_USER_ID);
+
+        assertThatNoException().isThrownBy(() ->
+            account.verifyOwner(TEST_USER_ID)
+        );
+    }
+
+    @Test
+    void 타인_계좌_소유권_테스트() {
+        Account account = Account.open(TEST_ACCOUNT_ID, TEST_USER_ID);
+
+        assertThatThrownBy(() -> account.verifyOwner(OTHER_USER_ID))
+                .isInstanceOf(AccountAccessDeniedException.class);
     }
 
     @Test
