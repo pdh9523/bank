@@ -45,6 +45,7 @@ public class TransferExecutor {
 
         if (!transferLimitCache.tryConsume(task.fromAccountId(), task.amount(), TRANSFER_LIMIT)) {
             txFrom.markFailed();
+            accountTransactionRepository.save(txFrom);
         } else {
             try {
                 // 2-1. 받는 사람 계좌 확인
