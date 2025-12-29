@@ -9,6 +9,6 @@ public record GetUserInfoResult(
         String email
 ) {
     public static GetUserInfoResult from(User user) {
-        return new GetUserInfoResult(user.getUserId(), user.getEmail());
+        return new GetUserInfoResult(user.userId(), user.email());
     }
 }

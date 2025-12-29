@@ -10,8 +10,8 @@ public record RegisterResult(
 ) {
     public static RegisterResult from(User user) {
         return new RegisterResult(
-                user.getUserId(),
-                user.getEmail()
+                user.userId(),
+                user.email()
         );
     }
 }

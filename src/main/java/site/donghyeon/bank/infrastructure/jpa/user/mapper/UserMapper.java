@@ -7,8 +7,8 @@ public final class UserMapper {
 
     public static UserJpaEntity toEntity(User user) {
         return new UserJpaEntity(
-                user.getUserId(),
-                user.getEmail()
+                user.userId(),
+                user.email()
         );
     }
 

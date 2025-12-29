@@ -1,20 +1,27 @@
 package site.donghyeon.bank.presentation.user.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import site.donghyeon.bank.application.user.command.GetUserInfoCommand;
+import site.donghyeon.bank.presentation.resolver.CurrentUser;
 
 import java.util.UUID;
 
-@Schema(description = "회원 조회 요청")
+@Schema(description = "회원 조회 요청 - 토큰에서 추출")
 public record GetUserInfoRequest(
-        @Schema(description = "조회할 사용자 ID", example = "00000000-0000-0000-0000-000000000000")
-        @NotBlank(message = "ID는 필수입니다.")
-        UUID userId
+        UUID userId,
+        String email
 ) {
+    public static GetUserInfoRequest from(CurrentUser currentUser) {
+        return new GetUserInfoRequest(
+                currentUser.userId(),
+                currentUser.email()
+        );
+    }
+
     public GetUserInfoCommand toCommand() {
         return new GetUserInfoCommand(
-                this.userId
+                this.userId,
+                this.email
         );
     }
 }
