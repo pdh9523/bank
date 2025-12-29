@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import site.donghyeon.bank.application.account.AccountTransactionUseCase;
 import site.donghyeon.bank.application.account.AccountUseCase;
 import site.donghyeon.bank.application.account.AccountOperationUseCase;
+import site.donghyeon.bank.domain.accountTransaction.enums.LimitType;
 import site.donghyeon.bank.presentation.account.request.*;
 import site.donghyeon.bank.presentation.account.response.*;
 import site.donghyeon.bank.presentation.common.resolver.CurrentUser;
@@ -152,6 +153,27 @@ public class AccountController {
                 TransactionsResponse.from(
                         accountTransactionUseCase.getTransactions(
                                 request.toQuery(currentUser.userId(), accountId)
+                        )
+                )
+        );
+    }
+
+    @GetMapping("/{accountId}/limit")
+    @Operation(
+            summary = "계좌 거래 한도 조회",
+            description = "<p>계좌의 거래 한도를 조회합니다.</p>" +
+                    "<p>type은 transfer, withdrawal 중 설정할 수 있습니다.</p>"
+    )
+    public ResponseEntity<AccountLimitResponse> getAccountLimit(
+            @Parameter(hidden = true)
+            @GetClaims CurrentUser currentUser,
+            @PathVariable UUID accountId,
+            @RequestParam LimitType type
+    ) {
+        return ResponseEntity.ok(
+                AccountLimitResponse.from(
+                        accountTransactionUseCase.getAccountLimit(
+                                AccountLimitRequest.of(currentUser.userId(), accountId, type).toQuery()
                         )
                 )
         );
