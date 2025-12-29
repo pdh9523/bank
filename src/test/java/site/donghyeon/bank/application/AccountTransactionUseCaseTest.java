@@ -5,12 +5,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import site.donghyeon.bank.application.account.transaction.query.TransactionEventQuery;
 import site.donghyeon.bank.application.account.transaction.query.TransactionsQuery;
 import site.donghyeon.bank.application.account.support.repository.AccountRepository;
 import site.donghyeon.bank.application.account.support.repository.AccountTransactionRepository;
+import site.donghyeon.bank.application.account.transaction.result.TransactionEventResult;
 import site.donghyeon.bank.application.account.transaction.result.TransactionsResult;
 import site.donghyeon.bank.application.account.transaction.service.AccountTransactionService;
-import site.donghyeon.bank.application.account.transaction.view.TransactionsView;
+import site.donghyeon.bank.application.account.transaction.view.TransactionView;
 import site.donghyeon.bank.common.domain.Money;
 import site.donghyeon.bank.domain.account.exception.AccountAccessDeniedException;
 import site.donghyeon.bank.domain.accountTransaction.enums.TransactionType;
@@ -53,7 +55,7 @@ public class AccountTransactionUseCaseTest {
 
         TransactionsResult expected = new TransactionsResult(
                 List.of(
-                        new TransactionsView(
+                        new TransactionView(
                                 TEST_EVENT_ID,
                                 Instant.parse("2025-01-01T00:00:00Z"),
                                 TransactionType.DEPOSIT,
@@ -111,5 +113,45 @@ public class AccountTransactionUseCaseTest {
         then(accountTransactionRepository)
                 .should(never())
                 .findByAccountId(query);
+    }
+
+    @Test
+    void 이벤트_조회_테스트() {
+        TransactionEventQuery query = new TransactionEventQuery(
+                TEST_USER_ID,
+                TEST_ACCOUNT_ID,
+                TEST_EVENT_ID
+        );
+
+
+        List<TransactionView> views = List.of(
+                new TransactionView(
+                        TEST_EVENT_ID,
+                        Instant.parse("2025-01-01T00:00:00Z"),
+                        TransactionType.DEPOSIT,
+                        new Money(1000),
+                        new Money(1000)
+                )
+        );
+
+        given(accountRepository.existsByUserIdAndAccountId(
+                TEST_USER_ID, TEST_ACCOUNT_ID)
+        ).willReturn(true);
+
+        given(accountTransactionRepository.findByAccountIdAndEventId(TEST_ACCOUNT_ID, TEST_EVENT_ID))
+                .willReturn(views);
+
+        TransactionEventResult result =
+                accountTransactionService.getTransactionEvent(query);
+
+        assertThat(result).isEqualTo(new TransactionEventResult(views));
+
+        then(accountRepository)
+                .should()
+                .existsByUserIdAndAccountId(TEST_USER_ID, TEST_ACCOUNT_ID);
+
+        then(accountTransactionRepository)
+                .should()
+                .findByAccountIdAndEventId(TEST_ACCOUNT_ID, TEST_EVENT_ID);
     }
 }
