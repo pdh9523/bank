@@ -1,0 +1,44 @@
+services:
+  postgres_keycloak:
+    image: postgres:17
+    container_name: postgres_keycloak
+    env_file:
+      - .env
+    volumes:
+      - postgres_keycloak_data:/var/lib/postgresql/data
+    networks:
+      - auth
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.0
+    container_name: keycloak
+    depends_on:
+      - postgres_keycloak
+    env_file:
+      - .env
+    networks:
+      - auth
+
+  nginx:
+    image: nginx:1.27
+    container_name: auth-nginx
+    depends_on:
+      - keycloak
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certbot_data:/etc/nginx/certbot
+      - /exec/nginx:/etc/nginx/conf.d
+      - /exec/cert/certbot/conf:/etc/letsencrypt
+      - /exec/cert/certbot/www:/var/www/certbot
+    networks:
+      - auth
+
+volumes:
+  postgres_keycloak_data:
+  certbot_data:
+
+networks:
+  auth:
+    driver: bridge
