@@ -9,4 +9,5 @@ public interface AccountRepository {
     Optional<Account> findById(UUID accountId);
     Account save(Account account);
     boolean existsById(UUID accountId);
+    boolean existsByUserIdAndAccountId(UUID userId, UUID accountId);
 }

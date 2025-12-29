@@ -60,7 +60,7 @@ public class Account {
         return this.status;
     }
 
-    private void verifyOwner(UUID userId) {
+    public void verifyOwner(UUID userId) {
         if (!this.userId.equals(userId)) {
             throw new AccountAccessDeniedException();
         }

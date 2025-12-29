@@ -35,4 +35,9 @@ public class AccountRepositoryAdapter implements AccountRepository {
     public boolean existsById(UUID accountId) {
         return accountJpaRepository.existsById(accountId);
     }
+
+    @Override
+    public boolean existsByUserIdAndAccountId(UUID userId, UUID accountId) {
+        return accountJpaRepository.existsByUserIdAndId(userId, accountId);
+    }
 }

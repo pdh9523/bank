@@ -15,11 +15,12 @@ public record TransferRequest(
         @NotBlank(message = "이체할 금액은 필수입니다.")
         long amount
 ) {
-    public TransferCommand toCommand(UUID fromAccountId) {
+    public TransferCommand toCommand(UUID userId, UUID fromAccountId) {
         if (fromAccountId == null) {
             throw new BadRequestException("accountID is required.");
         }
         return new TransferCommand(
+                userId,
                 fromAccountId,
                 this.toAccountId,
                 this.amount

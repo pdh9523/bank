@@ -74,9 +74,20 @@ public class AccountOperationService implements AccountOperationUseCase {
 
     @Override
     public WithdrawalResult withdrawal(WithdrawalCommand command) {
+        // 1. 계좌 조회
+        Account account = accountRepository.findById(command.fromAccountId())
+                .orElseThrow(() -> new AccountNotFoundException(command.fromAccountId()));
+
+        account.verifyOwner(command.userId());
+
+        // 2. 잔고 확인
         Money withdrawalAmount = new Money(command.amount());
 
-        // 1. 한도 조회
+        if (withdrawalAmount.exceeded(account.getBalance())) {
+            throw new InsufficientBalanceException(account.getBalance(), withdrawalAmount);
+        }
+
+        // 3. 한도 조회
         Money spentLimit = withdrawalLimitCache.checkWithdrawalLimit(command.fromAccountId());
         Money expectedLimit = spentLimit.add(withdrawalAmount);
 
@@ -84,15 +95,7 @@ public class AccountOperationService implements AccountOperationUseCase {
             throw new WithdrawalLimitExceededException(spentLimit, withdrawalAmount);
         }
 
-        // 2. 잔고 조회
-        Account account = accountRepository.findById(command.fromAccountId())
-                .orElseThrow(() -> new AccountNotFoundException(command.fromAccountId()));
-
-        if (withdrawalAmount.exceeded(account.getBalance())) {
-            throw new InsufficientBalanceException(account.getBalance(), withdrawalAmount);
-        }
-
-        // 3. 출금 요청 (pub)
+        // 4. 출금 요청 (pub)
         WithdrawalTask task = new WithdrawalTask(
                 UUID.randomUUID(),
                 command.fromAccountId(),
@@ -105,9 +108,20 @@ public class AccountOperationService implements AccountOperationUseCase {
 
     @Override
     public TransferResult transfer(TransferCommand command) {
+        // 1. 계좌 조회
+        Account account = accountRepository.findById(command.fromAccountId())
+                .orElseThrow(() -> new AccountNotFoundException(command.fromAccountId()));
+
+        account.verifyOwner(command.userId());
+
+        // 2. 잔고 조회
         Money transferAmount = new Money(command.amount());
 
-        // 1. 한도 조회
+        if (transferAmount.withFee().exceeded(account.getBalance())) {
+            throw new InsufficientBalanceException(account.getBalance(), transferAmount);
+        }
+
+        // 3. 한도 조회
         Money spentLimit = transferLimitCache.checkTransferLimit(command.fromAccountId());
         Money expectedLimit = spentLimit.add(transferAmount);
 
@@ -115,20 +129,12 @@ public class AccountOperationService implements AccountOperationUseCase {
             throw new TransferLimitExceededException(spentLimit, transferAmount);
         }
 
-        // 2. 상대방 계좌 확인
+        // 4. 상대방 계좌 확인
         if (!accountRepository.existsById(command.toAccountId())) {
             throw new AccountNotFoundException(command.toAccountId());
         }
 
-        // 3. 잔고 조회
-        Account account = accountRepository.findById(command.fromAccountId())
-                .orElseThrow(() -> new AccountNotFoundException(command.fromAccountId()));
-
-        if (transferAmount.withFee().exceeded(account.getBalance())) {
-            throw new InsufficientBalanceException(account.getBalance(), transferAmount);
-        }
-
-        // 4. 이체 요청 (pub)
+        // 5. 이체 요청 (pub)
         TransferTask task = new TransferTask(
                 UUID.randomUUID(),
                 command.fromAccountId(),

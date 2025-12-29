@@ -13,11 +13,12 @@ public record WithdrawalRequest(
         @NotBlank(message = "출금할 금액은 필수입니다.")
         long amount
 ) {
-    public WithdrawalCommand toCommand(UUID accountId) {
+    public WithdrawalCommand toCommand(UUID userId, UUID accountId) {
         if (accountId == null) {
             throw new BadRequestException("AccountId is required");
         }
         return new WithdrawalCommand(
+                userId,
                 accountId,
                 this.amount
         );

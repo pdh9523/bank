@@ -9,6 +9,8 @@ import site.donghyeon.bank.application.account.AccountUseCase;
 import site.donghyeon.bank.application.account.AccountOperationUseCase;
 import site.donghyeon.bank.presentation.account.request.*;
 import site.donghyeon.bank.presentation.account.response.*;
+import site.donghyeon.bank.presentation.resolver.CurrentUser;
+import site.donghyeon.bank.presentation.resolver.GetClaims;
 
 import java.util.UUID;
 
@@ -35,15 +37,14 @@ public class AccountController {
     @PostMapping()
     @Operation(
             summary = "계좌 개설",
-            description = "<p>계좌를 개설합니다.</p>" +
-                    "<p>TODO: keycloak 도입 시 인증을 통해 파라미터를 받도록 수정합니다.</p>"
+            description = "<p>계좌를 개설합니다.</p>"
     )
     public ResponseEntity<OpenAccountResponse> openAccount(
-            @RequestBody OpenAccountRequest request
+            @GetClaims CurrentUser currentUser
     ) {
         return ResponseEntity.ok(
                 OpenAccountResponse.from(
-                        accountUseCase.openAccount(request.toCommand())
+                        accountUseCase.openAccount(OpenAccountRequest.from(currentUser).toCommand())
                 )
         );
     }
@@ -51,13 +52,13 @@ public class AccountController {
     @DeleteMapping()
     @Operation(
             summary = "계좌 해지",
-            description = "<p>계좌를 해지합니다.</p>" +
-                    "<p>TODO: keycloak 도입 시 인증을 통해 파라미터를 받도록 수정합니다.</p>"
+            description = "<p>계좌를 해지합니다.</p>"
     )
     public ResponseEntity<Void> closeAccount(
+            @GetClaims CurrentUser currentUser,
             @RequestBody CloseAccountRequest request
     ) {
-        accountUseCase.closeAccount(request.toCommand());
+        accountUseCase.closeAccount(request.toCommand(currentUser.userId()));
         return ResponseEntity.noContent().build();
     }
 
@@ -86,12 +87,13 @@ public class AccountController {
                     "<p> 출금에 성공한 경우, 거래 내역의 PK를 반환합니다. </p>"
     )
     public ResponseEntity<WithdrawalResponse> withdrawal(
+            @GetClaims CurrentUser currentUser,
             @PathVariable UUID accountId,
             @RequestBody WithdrawalRequest request
     ) {
         return ResponseEntity.accepted().body(
                 WithdrawalResponse.from(
-                        accountOperationUseCase.withdrawal(request.toCommand(accountId))
+                        accountOperationUseCase.withdrawal(request.toCommand(currentUser.userId(), accountId))
                 )
         );
     }
@@ -103,12 +105,13 @@ public class AccountController {
                     "<p> 이체에 성공한 경우, 거래 내역의 PK를 반환합니다. </p>"
     )
     public ResponseEntity<TransferResponse> transfer(
+            @GetClaims CurrentUser currentUser,
             @PathVariable UUID accountId,
             @RequestBody TransferRequest request
     ) {
         return ResponseEntity.accepted().body(
                 TransferResponse.from(
-                        accountOperationUseCase.transfer(request.toCommand(accountId))
+                        accountOperationUseCase.transfer(request.toCommand(currentUser.userId(), accountId))
                 )
         );
     }
@@ -119,13 +122,14 @@ public class AccountController {
             description = "<p>계좌의 거래 내역을 조회합니다.</p>"
     )
     public ResponseEntity<TransactionsResponse> getTransactions(
+            @GetClaims CurrentUser currentUser,
             @PathVariable UUID accountId,
             @ModelAttribute TransactionsRequest request
     ) {
         return ResponseEntity.ok(
                 TransactionsResponse.from(
                         accountTransactionUseCase.getTransactions(
-                                request.toQuery(accountId)
+                                request.toQuery(currentUser.userId(), accountId)
                         )
                 )
         );

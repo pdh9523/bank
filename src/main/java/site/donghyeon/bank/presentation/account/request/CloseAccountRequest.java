@@ -8,14 +8,11 @@ import java.util.UUID;
 
 @Schema(description = "계좌 해지 요청")
 public record CloseAccountRequest(
-        @Schema(description = "요청한 사용자 ID", example = "00000000-0000-0000-0000-000000000000")
-        @NotBlank(message = "사용자 ID는 필수입니다.")
-        UUID userId,
         @Schema(description = "요청한 계좌 ID", example = "00000000-0000-0000-0000-000000000000")
         @NotBlank(message = "계좌 ID는 필수입니다.")
         UUID accountId
 ) {
-    public CloseAccountCommand toCommand() {
+    public CloseAccountCommand toCommand(UUID userId) {
         return new CloseAccountCommand(userId, accountId);
     }
 }
