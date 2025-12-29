@@ -1,10 +1,5 @@
 # 송금 서비스 설계
 
-계좌 간 송금 시스템을 설계하고 구현하고자 합니다.  
-이를 통해 읽기 전용 필드와 DB 설계 관점의 최적화를 중심으로 구현하는 것을 목표로 합니다.  
-
----
-
 ## 요구사항
 1. 계좌 등록 / 삭제   
 사용자는 계좌를 생성하고 삭제할 수 있다.  
@@ -33,7 +28,7 @@
 ### postgreSQL
 기본적으로 강한 정합성과 명확한 트랜잭션 경계를 보장하기 위해 RDBMS를 사용했습니다.  
 은행 도메인의 특성상 엄격한 정합성과 대용량 데이터의 안정적인 처리가 필수적이며,  
-partial index, CHECK 제약 등 MySQL에 비해 제약 조건과 인덱스 설계 측면에서 표현력이 풍부하다는 점에서 PostgreSQL을 선택했습니다.  
+partial index, CHECK 제약 등 MySQL에 비해 제약 조건과 인덱스 설계 측면에서 표현력이 풍부하다는 점에서 postgreSQL을 선택했습니다.  
 
 또한, 개인적으로 mySQL보다 더 익숙해서 안정적으로 운용할 수 있다고 판단해 선택했습니다.
 
@@ -49,7 +44,7 @@ partial index, CHECK 제약 등 MySQL에 비해 제약 조건과 인덱스 설�
 이벤트 로그를 장기간 보존하거나,  
 여러 소비자가 동일한 이벤트를 각기 다른 관점으로 소비해야 하는 경우에 의미가 크다.  
 그러나 본 요구사항은 이벤트 기록보다는 단일 작업의 정확한 처리와 완료 보장에 가깝다.  
-- Redis Stream
+- Redis Stream  
 기본적으로 한 소비자가 읽고 ACK 후 커서를 전환하는 구조이기 때문에,  
 입금 처리와 거래 내역 저장을 각각 단일 책임 워커로 분리해 fan-out 하려면  
 워커 간 재발행 흐름이 필요해지고, 이는 처리 구조를 불필요하게 복잡하게 만든다.  
@@ -129,6 +124,49 @@ SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bank
 SPRING_DATASOURCE_USERNAME=admin
 SPRING_DATASOURCE_PASSWORD=1234
 ```
+
+### 토큰 발급
+
+**토큰 발급 후 `GET /info` 조회가 필요합니다.**
+
+본 프로젝트는 Keycloak을 인증 서버(IdP)로 사용합니다.
+
+Keycloak Admin API를 통해 회원 가입 기능을 백엔드 내부에 구현할 수 있으나,  
+해당 방식은 Admin Credential 노출이 필요하므로 public repo 환경에 적절하지 않다고 판단했습니다.
+
+이에 따라 보안 리스크를 최소화하기 위해  
+사전에 생성된 테스트 계정을 사용하도록 구성했습니다.
+
+accessToken 유효 시간: 30분
+
+- 테스트 계정 1
+```text
+curl -X POST "https://auth.dong-hyeon.site/realms/bank/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password" \
+  -d "client_id=bank-api" \
+  -d "username=test1@test.com" \
+  -d "password=1234"
+```
+- 테스트 계정 2
+```text
+curl -X POST "https://auth.dong-hyeon.site/realms/bank/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password" \
+  -d "client_id=bank-api" \
+  -d "username=test2@test.com" \
+  -d "password=1234"
+```
+- 테스트 계정 3
+```text
+curl -X POST "https://auth.dong-hyeon.site/realms/bank/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password" \
+  -d "client_id=bank-api" \
+  -d "username=test3@test.com" \
+  -d "password=1234"
+```
+
 ---
 
 ## 테스트 커버리지
